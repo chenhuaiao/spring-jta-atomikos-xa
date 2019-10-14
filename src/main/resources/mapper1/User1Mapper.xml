@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="springcloud.atomikos.mapper1.UserMapper1">
+
+    <insert id="insert">
+        INSERT INTO "public"."test_user" ( "username", "age" )
+        VALUES (#{name },#{age } );
+    </insert>
+    
+    
+    <insert id="insertAccountList">
+      INSERT INTO "test"."user_account"
+      ("user_name", "total_money", "draw_money")
+      VALUES
+      <foreach collection="accountList" item="username" separator=",">
+          (#{username },10000,0)
+      </foreach>
+    </insert>
+
+    <select id="selectUserNameList" resultType="java.lang.String">
+      SELECT user_name from "estate"."user_account";
+    </select>
+
+    <update id="drawAccountMoney">
+        UPDATE test.user_account
+          SET total_money = total_money - #{money }
+           ,update_time=now()
+        WHERE user_name = #{username } AND (total_money - #{money }) >= 0 ;
+    </update>
+
+    <update id="addAccountMoney">
+        UPDATE test.user_account
+          SET total_money = total_money + #{money }
+          ,update_time=now()
+        WHERE user_name =  #{username };
+    </update>
+    
+    <select id="selectInfoByUserName" resultType="java.util.Map">
+        SELECT * from estate.user_account where user_name = #{username };
+    </select>
+
+    <insert id="insertDbActiveTest">
+        INSERT INTO "log"."log_money"
+        ( "user_name")
+        VALUES ('chenha');
+    </insert>
+    
+</mapper>

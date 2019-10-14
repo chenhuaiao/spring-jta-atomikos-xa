@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+
+
+		http://www.springframework.org/schema/tx
+		http://www.springframework.org/schema/tx/spring-tx.xsd
+		http://www.springframework.org/schema/aop
+	    http://www.springframework.org/schema/aop/spring-aop.xsd">
+
+    <!-- 事务注解驱动，标注@Transactional的类和方法将具有事务性 -->
+    <!--
+        当配置了mvc:annotation-driven/后，Spring就知道了我们启用注解驱动。
+        然后Spring通过context:component-scan/标签的配置，会自动为我们将扫描到的@Component，@Controller，@Service，@Repository等注解标记的组件注册到工厂中，来处理我们的请求。
+    -->
+    <!--<tx:annotation-driven transaction-manager="jtaTransactionManager" mode="proxy" proxy-target-class="false"/>-->
+    <tx:annotation-driven transaction-manager="jtaTransactionManager"/>
+    <!--
+    如果你正使用一个 JEE 容器而且想让 Spring 参与到容器管理事务(Container managed transactions,CMT,译者注)中,
+    那么 Spring 应该使用 JtaTransactionManager 或它的容 器指定的子类来配置。做这件事情的最方便的方式是用 Spring 的事务命名空间:
+    -->
+
+    <!--<tx:annotation-driven/>-->
+    <!--<tx:jta-transaction-manager/>-->
+
+    <tx:advice id="txAdvice" transaction-manager="jtaTransactionManager">
+        <tx:attributes>
+            <tx:method name="update*" rollback-for="java.lang.Exception" propagation="REQUIRED"/>
+            <tx:method name="save*" rollback-for="java.lang.Exception" propagation="REQUIRED"/>
+            <tx:method name="insert*" rollback-for="java.lang.Exception" propagation="REQUIRED"/>
+            <tx:method name="add*" rollback-for="java.lang.Exception" propagation="REQUIRED"/>
+            <tx:method name="delete*" rollback-for="java.lang.Exception" propagation="REQUIRED"/>
+
+            <tx:method name="get*" rollback-for="java.lang.Exception" read-only="true"
+                       propagation="REQUIRED"></tx:method>
+            <tx:method name="*" rollback-for="java.lang.Exception" read-only="false" timeout="300"
+                       propagation="REQUIRED"></tx:method>
+        </tx:attributes>
+    </tx:advice>
+
+    <!-- 编写aop,让spring自动对目标生成代理 -->
+    <aop:config>
+        <!-- 切入点 -->
+        <aop:pointcut expression="execution(* springcloud.atomikos..service.*.*(..))"
+                      id="myPointcut"/>
+        <!-- 配置通知器：将切入点与通知整合 -->
+        <aop:advisor advice-ref="txAdvice" pointcut-ref="myPointcut"/>
+    </aop:config>
+
+</beans>
